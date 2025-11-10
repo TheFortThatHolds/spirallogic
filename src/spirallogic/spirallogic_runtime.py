@@ -17,12 +17,14 @@ import traceback
 from datetime import datetime
 from dataclasses import dataclass, asdict
 from types import SimpleNamespace
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any, Callable, Union
 import builtins
 import threading
 import uuid
 import sqlite3
 import os
+import subprocess
+from pathlib import Path
 
 @dataclass
 class ConsentRequest:
@@ -349,6 +351,7 @@ class PythonExecutionSandbox:
             'uuid': uuid,
             'hashlib': hashlib,
             'SimpleNamespace': SimpleNamespace,
+            'Path': Path,
         }
 
         try:
@@ -413,6 +416,138 @@ class ExecutionBridge:
             'details': self._runtime._safe_json_value(details) if details else {}
         }
         self._runtime.attestation_logger.log('execution_note', payload, self._context.ritual_id)
+
+    # --- Guarded developer utilities -------------------------------------------------------
+
+    def emit_artifact(self, name: str, data: Any) -> None:
+        """Attach arbitrary data to the ritual's artifact log."""
+        self._runtime._record_artifact(self._context, name, data)
+
+    def read_text(self, path: Union[str, Path], *, encoding: str = 'utf-8') -> str:
+        """Read a text file after verifying consent."""
+        resolved = self._runtime._resolve_path(path)
+        self.require_scope('file_system', f'Read file: {resolved}')
+        content = resolved.read_text(encoding=encoding)
+        preview = content[:2000]
+        self._runtime._log_bridge_action(
+            'bridge.file_read',
+            {
+                'path': str(resolved),
+                'bytes': len(content.encode(encoding, errors='ignore')),
+                'preview': preview,
+            },
+            self._context,
+        )
+        return content
+
+    def write_text(
+        self,
+        path: Union[str, Path],
+        content: str,
+        *,
+        encoding: str = 'utf-8',
+        ensure_parents: bool = True,
+    ) -> str:
+        """Write text into a file with consent + attestation logging."""
+        resolved = self._runtime._resolve_path(path)
+        self.require_scope('file_system', f'Write file: {resolved}')
+        if ensure_parents:
+            resolved.parent.mkdir(parents=True, exist_ok=True)
+        resolved.write_text(content, encoding=encoding)
+        self._runtime._log_bridge_action(
+            'bridge.file_write',
+            {
+                'path': str(resolved),
+                'bytes': len(content.encode(encoding, errors='ignore')),
+            },
+            self._context,
+        )
+        return str(resolved)
+
+    def append_text(
+        self,
+        path: Union[str, Path],
+        content: str,
+        *,
+        encoding: str = 'utf-8',
+        ensure_parents: bool = True,
+    ) -> str:
+        resolved = self._runtime._resolve_path(path)
+        self.require_scope('file_system', f'Append file: {resolved}')
+        if ensure_parents:
+            resolved.parent.mkdir(parents=True, exist_ok=True)
+        with resolved.open('a', encoding=encoding) as handle:
+            handle.write(content)
+        self._runtime._log_bridge_action(
+            'bridge.file_append',
+            {
+                'path': str(resolved),
+                'bytes': len(content.encode(encoding, errors='ignore')),
+            },
+            self._context,
+        )
+        return str(resolved)
+
+    def list_dir(self, path: Union[str, Path] = '.') -> List[str]:
+        resolved = self._runtime._resolve_path(path)
+        self.require_scope('file_system', f'List directory: {resolved}')
+        entries = sorted(str(p) for p in resolved.iterdir())
+        self._runtime._log_bridge_action(
+            'bridge.list_dir',
+            {
+                'path': str(resolved),
+                'entries': entries[:25],
+                'count': len(entries),
+            },
+            self._context,
+        )
+        return entries
+
+    def run_shell(
+        self,
+        command: str,
+        *,
+        cwd: Optional[Union[str, Path]] = None,
+        timeout: int = 120,
+        env: Optional[Dict[str, str]] = None,
+    ) -> Dict[str, Any]:
+        """Run a shell command with consent + full attestation."""
+        self.require_scope('system_shell', f'Run shell command: {command}')
+        resolved_cwd = None
+        if cwd is not None:
+            resolved_cwd = str(self._runtime._resolve_path(cwd))
+
+        try:
+            completed = subprocess.run(
+                command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                cwd=resolved_cwd,
+                timeout=timeout,
+                env=env,
+            )
+            result = {
+                'command': command,
+                'exit_code': completed.returncode,
+                'stdout': completed.stdout,
+                'stderr': completed.stderr,
+            }
+        except subprocess.TimeoutExpired as exc:
+            result = {
+                'command': command,
+                'timeout': timeout,
+                'stdout': exc.stdout or '',
+                'stderr': exc.stderr or 'Command timed out',
+                'exit_code': None,
+            }
+
+        self._runtime._log_bridge_action(
+            'bridge.shell',
+            {**result, 'cwd': resolved_cwd},
+            self._context,
+        )
+        return result
 
 
 class SpiralLogic:
@@ -710,8 +845,30 @@ class SpiralLogic:
             'ritual.database_query': ['database_access'],
             'ritual.database_insert': ['database_access'],
             'ritual.database_connection': ['database_access'],
+            'ritual.shell': ['system_shell'],
+            'ritual.git': ['system_shell'],
         }
         return mapping.get(step_type, [])
+
+    def _resolve_path(self, path: Union[str, Path]) -> Path:
+        """Resolve a user-provided path relative to the current working directory."""
+        candidate = Path(path) if not isinstance(path, Path) else path
+        candidate = candidate.expanduser()
+        if not candidate.is_absolute():
+            candidate = Path.cwd() / candidate
+        return candidate.resolve()
+
+    def _record_artifact(self, context: RitualContext, name: str, data: Any) -> None:
+        safe_data = self._safe_json_value(data)
+        context.artifacts.setdefault(name, []).append(safe_data)
+        self.attestation_logger.log(
+            'artifact.recorded',
+            {'name': name, 'data': safe_data},
+            context.ritual_id,
+        )
+
+    def _log_bridge_action(self, event: str, payload: Dict[str, Any], context: RitualContext) -> None:
+        self.attestation_logger.log(event, self._safe_json_value(payload), context.ritual_id)
 
     def _summarize_execution_locals(self, env_locals: Dict[str, Any]) -> Dict[str, Any]:
         """Produce a JSON-safe snapshot of local variables."""

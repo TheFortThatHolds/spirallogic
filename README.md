@@ -49,3 +49,27 @@ python spirallogic_cli.py examples/real_spirallogic_test.sl
 ```
 
 This will run the ritual defined in the file, and the runtime will prompt for any required consents in the console.
+If you installed via `pip`, the `spirallogic` console entry point is also available globally:
+
+```bash
+spirallogic examples/real_spirallogic_test.sl
+```
+
+## Guarded Development Mode
+
+SpiralLogic is meant to be the guardrail layer for AI coding agents. Instead of letting an agent run arbitrary Python, require it to express every action through a ritual. Inside any `ritual.*` step you can add an `execute { ... }` block that contains the code to run once the declared consent scopes are granted.
+
+The runtime now exposes a **development bridge** so those execute blocks can safely touch the filesystem or shell:
+
+- `context.bridge.read_text(path)` / `write_text(path, content)` / `append_text(path, content)`
+- `context.bridge.list_dir(path)` for quick inspection
+- `context.bridge.run_shell(command, cwd=...)` to run git/tests from within the guardrail
+- `context.bridge.emit_artifact(name, data)` to attach structured evidence to the execution log
+
+Every helper enforces consent scopes (`file_system`, `system_shell`, etc.) and writes a tamper-evident attestation entry. You can see it in action by running the new example:
+
+```bash
+spirallogic examples/guarded_dev_session.sl -v
+```
+
+This ritual checks git status via the guarded shell helper, updates `README.md` only if a documentation section is missing, and records artifacts for review. Wire your agent so it **must** emit guardrail rituals like this before touching code, and SpiralLogic becomes the enforced replacement for loose Python scripts.
