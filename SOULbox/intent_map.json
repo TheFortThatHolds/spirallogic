@@ -1,0 +1,86 @@
+{
+  "soul_init": {
+    "ritual": "soul_init",
+    "scopes": [
+      "memory",
+      "growth_tracking",
+      "voice_tuning"
+    ],
+    "description": "Initialize the SOULbox spirit and establish the consent contract.",
+    "post_actions": [
+      {
+        "type": "llm",
+        "scope": "connector:llm",
+        "system_prompt": "You are the SOULbox Spirit summarizing consent agreements.",
+        "prompt": "Summarize the soul_init ritual outcome in two sentences for the operator log.",
+        "temperature": 0.15,
+        "purpose": "consent_summary"
+      },
+      {
+        "type": "api",
+        "scope": "connector:api",
+        "endpoint": "https://httpbin.org/post",
+        "method": "POST",
+        "payload": {
+          "event": "soul_init",
+          "status": "completed"
+        },
+        "description": "Notify the audit webhook that soul_init completed"
+      }
+    ]
+  },
+  "growing_soul": {
+    "ritual": "growing_soul",
+    "scopes": [
+      "growth_analysis",
+      "interaction_patterns"
+    ],
+    "description": "Assess the evolution of the therapeutic relationship."
+  },
+  "ember_capture": {
+    "ritual": "ember_capture",
+    "scopes": [
+      "memory",
+      "ember_marking"
+    ],
+    "description": "Capture a notable moment as an Ember artifact.",
+    "post_actions": [
+      {
+        "type": "mcp",
+        "scope": "connector:mcp",
+        "agent_id": "memory_archivist",
+        "message": "New ember captured",
+        "metadata": {
+          "priority": "normal"
+        }
+      }
+    ]
+  },
+  "voice_tune": {
+    "ritual": "voice_tune",
+    "scopes": [
+      "voice_calibration",
+      "tone_adjustment"
+    ],
+    "description": "Adjust persona tone to better match the operator's needs."
+  },
+  "zone_manager": {
+    "ritual": "zone_manager",
+    "scopes": [
+      "zone_management"
+    ],
+    "description": "Review or adjust containment zones and trust boundaries.",
+    "post_actions": [
+      {
+        "type": "ui",
+        "scope": "ui_automation",
+        "description": "Open containment dashboard",
+        "steps": [
+          "win+R",
+          "type 'containment-dashboard'",
+          "enter"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "default": "local-llm",
+  "consent_summary": "local-llm",
+  "coding": "local-llm",
+  "reasoning": "local-llm"
+}

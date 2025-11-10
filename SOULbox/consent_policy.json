@@ -1,0 +1,4 @@
+{
+  "blocked_scopes": ["external_physical_control"],
+  "require_manual": ["ui_automation", "financial_transactions", "high_risk_sharing"]
+}
