@@ -73,3 +73,17 @@ spirallogic examples/guarded_dev_session.sl -v
 ```
 
 This ritual checks git status via the guarded shell helper, updates `README.md` only if a documentation section is missing, and records artifacts for review. Wire your agent so it **must** emit guardrail rituals like this before touching code, and SpiralLogic becomes the enforced replacement for loose Python scripts.
+
+## Voice-of-the-Day Journal Helper
+
+Need something tangible? The `examples/journal_voice_helper.sl` ritual turns SpiralLogic into a daily reflection coach:
+
+1. Create a folder named `journal_entries` next to the ritual and drop your `.txt`/`.md` journal notes inside (timestamped filenames work great).
+2. Optional: create an empty `journal_reflections` folder where SpiralLogic can write its summaries.
+3. Run the ritual:
+   ```bash
+   spirallogic examples/journal_voice_helper.sl -v
+   ```
+4. When prompted, grant `file_system` + `memory` consent so it can read entries and save summaries.
+
+The runtime will locate the newest journal file, analyze tone/crisis language, emit an artifact summary, and write a fresh reflection markdown file (e.g., `journal_reflections/reflection_20250301_083000.md`). Everything is logged to the attestation chain, so you get a proof trail for every helpful action the language takes.
