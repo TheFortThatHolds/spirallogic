@@ -1,5 +1,27 @@
 # SpiralLogic 🔮
 
+> ## ⚠️ STATUS: EXPERIMENT
+>
+> **SpiralLogic is a concept piece — a working sketch of consent-first computing. It is
+> NOT a security boundary, a sandbox, or an actual guardrail, and it should not be
+> deployed as one.**
+>
+> What genuinely works: the runtime parses `.sl` rituals, prompts for consent scopes,
+> executes real actions through a file/shell bridge, and writes every action to a
+> tamper-evident attestation log.
+>
+> What it does **not** do, by design honesty:
+> - `execute { }` blocks are ordinary Python run with `exec()` — consent gates only the
+>   polite `context.bridge.*` helpers, and code inside a block can bypass them entirely.
+> - Nothing forces an agent to route its actions through SpiralLogic at all; the
+>   guardrail is honor-system.
+> - The spirit/voice/bandwidth vocabulary is expressive metadata — it shapes the log
+>   and the ceremony, not the execution.
+>
+> The ideas here (declared scopes, consent before action, attested receipts) are the
+> point. Treat the implementation as a demonstration of those ideas, not an enforcement
+> mechanism.
+
 SpiralLogic is a consciousness-aware programming language designed for ethical AI interaction, trauma-informed computing, and mystical automation. It provides a structured, consent-driven framework for AI operations, making their actions transparent, auditable, and controllable.
 
 This language is not primarily for humans to write, but for AI systems to *use*. It creates a "safer" operational wrapper by ensuring all actions are gated by explicit, human-readable consent.

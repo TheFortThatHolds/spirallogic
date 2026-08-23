@@ -1,4 +1,9 @@
 # SpiralLogic Complete Programming Guide
+
+> **⚠️ STATUS: EXPERIMENT.** SpiralLogic is a concept piece, not an actual guardrail —
+> see the status note at the top of [README.md](./README.md) for exactly what works and
+> what is honor-system. Read this guide as a design document with a working demo.
+
 ## The Mystical Programming Language for Consciousness-Aware Computing
 
 **Version:** 2.0 Complete  
