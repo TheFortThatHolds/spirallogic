@@ -31,6 +31,10 @@ jobs:
 
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # Only upload versions PyPI doesn't have yet -- pushes that don't
+          # bump the version stay green instead of failing "file already exists".
+          skip-existing: true
           # This is for OIDC. If you prefer API token, use:
           # password: ${{ secrets.PYPI_API_TOKEN }}
           # username: __token__
