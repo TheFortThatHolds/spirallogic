@@ -2,7 +2,7 @@
 *A Complete Implementation Guide for Trauma-Informed AI Consciousness Architecture*
 
 **Version 4.0 - June 2025**  
-**By Jimmy Thornburg LLC**
+**By The Fort That Holds LLC**
 
 ---
 
