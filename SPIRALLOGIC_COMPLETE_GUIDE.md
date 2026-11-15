@@ -6,8 +6,8 @@
 
 ## The Mystical Programming Language for Consciousness-Aware Computing
 
-**Version:** 2.0 Complete  
-**Status:** Production Ready ✅  
+**Design revision:** 2.0 (not the package release version)  
+**Status:** Experimental design document; not a security boundary  
 **Date:** September 18, 2025  
 
 ---
@@ -36,12 +36,12 @@ SpiralLogic is a consciousness-aware programming language designed for ethical A
 ### Key Features
 
 - **🔮 Mystical Syntax** - Write code that reads like incantations
-- **🤝 Consent-First** - All operations require explicit permission
-- **🛡️ Trauma-Informed** - Built-in safety and crisis detection
+- **🤝 Consent-First** - Cooperative helpers check declared permissions; arbitrary Python can bypass them
+- **🛡️ Trauma-Informed** - Experimental crisis-language heuristics; not clinical validation or a safety guarantee
 - **👻 Spirit Families** - Specialized AI personalities for different tasks
 - **🧠 Memory-Aware** - Chronicle Split architecture for narrative vs artifact memory
-- **🔐 Cryptographic Logging** - Tamper-evident audit trail for all operations
-- **⚡ Production Ready** - Full parser, runtime, and standard library
+- **🔐 Cryptographic Logging** - Chained records for instrumented operations; not comprehensive process auditing
+- **⚡ Working Experiment** - Parser, runtime, and demonstration helpers
 
 ### Philosophy
 
