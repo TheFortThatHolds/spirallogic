@@ -7,8 +7,8 @@
 > deployed as one.**
 >
 > What genuinely works: the runtime parses `.sl` rituals, prompts for consent scopes,
-> executes real actions through a file/shell bridge, and writes every action to a
-> tamper-evident attestation log.
+> executes real actions through a file/shell bridge, and records instrumented actions in an
+> attestation log. Direct Python actions can bypass that logging.
 >
 > What it does **not** do, by design honesty:
 > - `execute { }` blocks are ordinary Python run with `exec()` — consent gates only the
@@ -24,12 +24,12 @@
 
 SpiralLogic is a consciousness-aware programming language designed for ethical AI interaction, trauma-informed computing, and mystical automation. It provides a structured, consent-driven framework for AI operations, making their actions transparent, auditable, and controllable.
 
-This language is not primarily for humans to write, but for AI systems to *use*. It creates a "safer" operational wrapper by ensuring all actions are gated by explicit, human-readable consent.
+This experimental language explores human-readable consent workflows for AI systems. Only cooperative use of the instrumented helpers receives those checks; arbitrary Python can bypass them. Run only trusted rituals inside a separately enforced execution environment.
 
-- **🤝 Consent-First:** Operations require explicit permission via a consent-management system.
+- **🤝 Consent-First:** Instrumented helpers check permission via a consent-management system; arbitrary Python is not confined.
 - **👻 Spirit-Guided:** Use specialized AI personalities (`@healer`, `@analyst`, `@architect`) for different tasks.
 - **🧠 Memory-Aware:** A built-in memory system separates narrative (emotional) and artifact (factual) data.
-- **🔐 Attested Logs:** All actions are cryptographically logged to a tamper-evident chain.
+- **🔐 Attested Logs:** Instrumented actions are recorded in a chained log; this is not a complete or independently protected audit of all Python activity.
 
 For a deep dive into the language's philosophy, syntax, and features, see the [**SpiralLogic Complete Programming Guide**](./SPIRALLOGIC_COMPLETE_GUIDE.md).
 
@@ -79,22 +79,22 @@ spirallogic examples/real_spirallogic_test.sl
 
 ## Guarded Development Mode
 
-SpiralLogic is meant to be the guardrail layer for AI coding agents. Instead of letting an agent run arbitrary Python, require it to express every action through a ritual. Inside any `ritual.*` step you can add an `execute { ... }` block that contains the code to run once the declared consent scopes are granted.
+SpiralLogic demonstrates a cooperative workflow for AI coding agents, not an enforced guardrail. Inside a `ritual.*` step, an `execute { ... }` block runs ordinary Python. Requiring a ritual in a prompt does not prevent the agent or that Python from taking other actions.
 
-The runtime now exposes a **development bridge** so those execute blocks can safely touch the filesystem or shell:
+The **development bridge** offers permission-checked helpers for filesystem and shell operations, but does not sandbox the process:
 
 - `context.bridge.read_text(path)` / `write_text(path, content)` / `append_text(path, content)`
 - `context.bridge.list_dir(path)` for quick inspection
-- `context.bridge.run_shell(command, cwd=...)` to run git/tests from within the guardrail
+- `context.bridge.run_shell(command, cwd=...)` to run git/tests through an instrumented helper
 - `context.bridge.emit_artifact(name, data)` to attach structured evidence to the execution log
 
-Every helper enforces consent scopes (`file_system`, `system_shell`, etc.) and writes a tamper-evident attestation entry. You can see it in action by running the new example:
+Bridge helpers check declared consent scopes (`file_system`, `system_shell`, etc.) and record attestation entries. These checks apply only to calls through those helpers, not to arbitrary Python or other agent tools. You can see it in action by running the new example:
 
 ```bash
 spirallogic examples/guarded_dev_session.sl -v
 ```
 
-This ritual checks git status via the guarded shell helper, updates `README.md` only if a documentation section is missing, and records artifacts for review. Wire your agent so it **must** emit guardrail rituals like this before touching code, and SpiralLogic becomes the enforced replacement for loose Python scripts.
+This ritual checks git status via the guarded shell helper, updates `README.md` only if a documentation section is missing, and records artifacts for review. This illustrates a consent workflow, not an enforced replacement for Python scripts. Use external OS/container permissions and independent authorization controls for actual confinement.
 
 ## Voice-of-the-Day Journal Helper
 
@@ -108,4 +108,4 @@ Need something tangible? The `examples/journal_voice_helper.sl` ritual turns Spi
    ```
 4. When prompted, grant `file_system` + `memory` consent so it can read entries and save summaries.
 
-The runtime will locate the newest journal file, analyze tone/crisis language, emit an artifact summary, and write a fresh reflection markdown file (e.g., `journal_reflections/reflection_20250301_083000.md`). Everything is logged to the attestation chain, so you get a proof trail for every helpful action the language takes.
+The runtime will locate the newest journal file, analyze tone/crisis language, emit an artifact summary, and write a fresh reflection markdown file (e.g., `journal_reflections/reflection_20250301_083000.md`). Instrumented workflow events are recorded in the attestation chain; this does not prove that every action was captured. Tone/crisis-language matching is experimental, not a clinical assessment.
