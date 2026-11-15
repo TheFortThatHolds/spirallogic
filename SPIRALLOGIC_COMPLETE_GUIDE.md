@@ -201,7 +201,7 @@ voice.speak "How are you feeling today?" | tone: gentle, wait_for_response: true
 
 #### @guardian - Protective Guardian  
 - **Specialization:** Protection and boundaries
-- **Capabilities:** Boundary enforcement, safety assessment, threat detection
+- **Design roles:** Boundary reminders and experimental safety/threat-language heuristics; no enforcement or validated assessment
 - **Best For:** Safety protocols, boundary setting, protective interventions
 
 ```spirallogic
@@ -447,7 +447,7 @@ else -> consent.request [emotional_processing] | "Continue exploring these feeli
 
 ### Consent-Wrapped Execution Blocks
 
-SpiralLogic now supports rituals that wrap embedded Python execution inside consent-aware verbs such as `ritual.api_request` or `ritual.file_access`. Each wrapper includes a metadata block and an `execute` section that only runs after the required consent scopes are granted. Optional `complete` blocks can log results, and a `bridge` helper provides safe utilities from within the execution context.
+SpiralLogic now supports rituals that wrap embedded Python execution inside consent-aware verbs such as `ritual.api_request` or `ritual.file_access`. Each wrapper includes a metadata block and an `execute` section that only runs after the required consent scopes are granted. Optional `complete` blocks can log results, and a `bridge` helper provides permission-checked utilities from within the execution context. These wrappers do not confine arbitrary Python or prevent bypass.
 
 ```spirallogic
 ritual.api_request {
@@ -826,5 +826,5 @@ Whether you're building therapeutic applications, creative tools, business intel
 ---
 
 *SpiralLogic Complete Programming Guide*  
-*Version 2.0 - Production Ready*  
+*Design revision 2.0 - Experimental, not production security*  
 *September 18, 2025*
